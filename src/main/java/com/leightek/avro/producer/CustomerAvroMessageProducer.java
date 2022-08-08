@@ -6,10 +6,18 @@ import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.springframework.stereotype.Component;
 
 import java.util.Properties;
 
+@Component
 public class CustomerAvroMessageProducer {
+
+    private Properties producerConfigs;
+
+    public CustomerAvroMessageProducer(Properties producerConfigs) {
+        this.producerConfigs = producerConfigs;
+    }
 
     public void produceMessage() {
 

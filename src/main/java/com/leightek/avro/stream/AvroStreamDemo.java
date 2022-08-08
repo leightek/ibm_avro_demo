@@ -12,10 +12,29 @@ import com.leightek.avro.producer.CustomerBalanceAvroMessageProducer;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AvroStreamDemo {
+public class AvroStreamDemo implements Runnable {
+
+    private CustomerAvroMessageProducer customerProducer;
+    private BalanceAvroMessageProducer balanceProducer;
+    private CustomerBalanceAvroMessageProducer customerBalanceProducer;
+
+    private CustomerAvroMessageConsumer customerConsumer;
+    private BalanceAvroMessageConsumer balanceConsumer;
+
+    public AvroStreamDemo(CustomerAvroMessageProducer customerProducer,
+                          BalanceAvroMessageProducer balanceProducer,
+                          CustomerBalanceAvroMessageProducer customerBalanceProducer,
+                          CustomerAvroMessageConsumer customerConsumer,
+                          BalanceAvroMessageConsumer balanceConsumer) {
+        this.customerProducer = customerProducer;
+        this.balanceProducer = balanceProducer;
+        this.customerBalanceProducer = customerBalanceProducer;
+        this.customerConsumer = customerConsumer;
+        this.balanceConsumer = balanceConsumer;
+    }
 
     private static void mergeCustomerBalance(Customer customer, List<Balance> balanceList,
-                                      List<CustomerBalance> customerBalanceList, Set<String> accountIds) {
+                                             List<CustomerBalance> customerBalanceList, Set<String> accountIds) {
         balanceList.forEach(balance -> {
             if (Objects.equals(customer.getAccountId(), balance.getAccountId())) {
                 CustomerBalance customerBalance = CustomerBalance.newBuilder()
@@ -30,13 +49,8 @@ public class AvroStreamDemo {
         });
     }
 
-    public static void main(String[] args) {
-        CustomerAvroMessageProducer customerProducer = new CustomerAvroMessageProducer();
-        BalanceAvroMessageProducer balanceProducer = new BalanceAvroMessageProducer();
-        CustomerBalanceAvroMessageProducer customerBalanceProducer = new CustomerBalanceAvroMessageProducer();
-
-        CustomerAvroMessageConsumer customerConsumer = new CustomerAvroMessageConsumer();
-        BalanceAvroMessageConsumer balanceConsumer = new BalanceAvroMessageConsumer();
+    @Override
+    public void run() {
 
         customerProducer.produceMessage();
         balanceProducer.produceMessage();

@@ -2,15 +2,24 @@ package com.leightek.avro.consumer;
 
 import com.ibm.gbs.schema.Customer;
 import com.leightek.avro.util.Utils;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+@Component
 public class CustomerAvroMessageConsumer {
+
+    private ConsumerConfig consumerConfigs;
+
+    public CustomerAvroMessageConsumer(ConsumerConfig consumerConfigs) {
+        this.consumerConfigs = consumerConfigs;
+    }
 
     public List<Customer> consumeMessage(List<Customer> customers) {
         Properties properties = Utils.createConsumerProperties();

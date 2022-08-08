@@ -2,16 +2,25 @@ package com.leightek.avro.consumer;
 
 import com.ibm.gbs.schema.Balance;
 import com.leightek.avro.util.Utils;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+@Configuration
 public class BalanceAvroMessageConsumer {
+
+    private ConsumerConfig consumerConfigs;
+
+    public BalanceAvroMessageConsumer(ConsumerConfig consumerConfigs) {
+        this.consumerConfigs = consumerConfigs;
+    }
 
     public List<Balance> consumeMessage(List<Balance> balanceList) {
         Properties properties = Utils.createConsumerProperties();
