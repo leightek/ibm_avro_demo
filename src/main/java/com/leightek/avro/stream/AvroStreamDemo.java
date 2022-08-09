@@ -10,6 +10,7 @@ import com.leightek.avro.producer.CustomerAvroMessageProducer;
 import com.leightek.avro.producer.CustomerBalanceAvroMessageProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,21 +20,35 @@ public class AvroStreamDemo implements Runnable {
     private static Logger logger = LoggerFactory.getLogger(AvroStreamDemo.class);
 
     private CustomerAvroMessageProducer customerProducer;
+
     private BalanceAvroMessageProducer balanceProducer;
     private CustomerBalanceAvroMessageProducer customerBalanceProducer;
 
     private CustomerAvroMessageConsumer customerConsumer;
     private BalanceAvroMessageConsumer balanceConsumer;
 
-    public AvroStreamDemo(CustomerAvroMessageProducer customerProducer,
-                          BalanceAvroMessageProducer balanceProducer,
-                          CustomerBalanceAvroMessageProducer customerBalanceProducer,
-                          CustomerAvroMessageConsumer customerConsumer,
-                          BalanceAvroMessageConsumer balanceConsumer) {
+    @Autowired
+    public void setCustomerProducer(CustomerAvroMessageProducer customerProducer) {
         this.customerProducer = customerProducer;
+    }
+
+    @Autowired
+    public void setBalanceProducer(BalanceAvroMessageProducer balanceProducer) {
         this.balanceProducer = balanceProducer;
+    }
+
+    @Autowired
+    public void setCustomerBalanceProducer(CustomerBalanceAvroMessageProducer customerBalanceProducer) {
         this.customerBalanceProducer = customerBalanceProducer;
+    }
+
+    @Autowired
+    public void setCustomerConsumer(CustomerAvroMessageConsumer customerConsumer) {
         this.customerConsumer = customerConsumer;
+    }
+
+    @Autowired
+    public void setBalanceConsumer(BalanceAvroMessageConsumer balanceConsumer) {
         this.balanceConsumer = balanceConsumer;
     }
 
@@ -69,7 +84,7 @@ public class AvroStreamDemo implements Runnable {
         Set<String> accountIds = new HashSet<>();
 
         while (true) {
-            logger.info("coonsuming messages ...");
+            logger.info("consuming messages ...");
             customers = customerConsumer.consumeMessage(customers);
             balanceList = balanceConsumer.consumeMessage(balanceList);
 

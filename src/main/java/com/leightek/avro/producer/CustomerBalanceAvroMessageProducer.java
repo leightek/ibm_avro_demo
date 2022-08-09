@@ -15,7 +15,7 @@ import java.util.Properties;
 @Component
 public class CustomerBalanceAvroMessageProducer {
 
-    private static Logger logger = LoggerFactory.getLogger(BalanceAvroMessageProducer.class);
+    private static Logger logger = LoggerFactory.getLogger(CustomerBalanceAvroMessageProducer.class);
 
     private Properties producerProperties;
 
