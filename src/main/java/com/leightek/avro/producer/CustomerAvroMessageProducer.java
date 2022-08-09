@@ -1,11 +1,13 @@
 package com.leightek.avro.producer;
 
 import com.ibm.gbs.schema.Customer;
-import com.leightek.avro.util.Utils;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Properties;
@@ -13,16 +15,17 @@ import java.util.Properties;
 @Component
 public class CustomerAvroMessageProducer {
 
-    private Properties producerConfigs;
+    private static Logger logger = LoggerFactory.getLogger(CustomerAvroMessageProducer.class);
 
-    public CustomerAvroMessageProducer(Properties producerConfigs) {
-        this.producerConfigs = producerConfigs;
+    private Properties producerProperties;
+
+    public CustomerAvroMessageProducer(@Qualifier("kafkaProducerConfigs") Properties producerProperties) {
+        this.producerProperties = producerProperties;
     }
 
     public void produceMessage() {
 
-        Properties properties = Utils.createProducerProperties();
-        KafkaProducer<String, Customer> kafkaProducer = new KafkaProducer<String, Customer>(properties);
+        KafkaProducer<String, Customer> kafkaProducer = new KafkaProducer<String, Customer>(producerProperties);
         String topic = "Customer";
 
         Customer customer = Customer.newBuilder()
@@ -38,10 +41,10 @@ public class CustomerAvroMessageProducer {
             @Override
             public void onCompletion(RecordMetadata metadata, Exception exception) {
                 if (exception == null) {
-                    System.out.println("Produce Customer message successfully!");
-                    System.out.println(metadata.toString());
+                    logger.info("Produce Customer message successfully!");
+                    logger.debug(metadata.toString());
                 } else {
-                    exception.printStackTrace();
+                    logger.error("Exception encountered during producing Customer message: ", exception);
                 }
             }
         });

@@ -1,11 +1,12 @@
 package com.leightek.avro.consumer;
 
 import com.ibm.gbs.schema.Balance;
-import com.leightek.avro.util.Utils;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
@@ -16,20 +17,21 @@ import java.util.Properties;
 @Configuration
 public class BalanceAvroMessageConsumer {
 
-    private ConsumerConfig consumerConfigs;
+    private static Logger logger = LoggerFactory.getLogger(BalanceAvroMessageConsumer.class);
 
-    public BalanceAvroMessageConsumer(ConsumerConfig consumerConfigs) {
-        this.consumerConfigs = consumerConfigs;
+    private Properties consumerProperties;
+
+    public BalanceAvroMessageConsumer(@Qualifier("kafkaConsumerConfigs") Properties consumerProperties) {
+        this.consumerProperties = consumerProperties;
     }
 
     public List<Balance> consumeMessage(List<Balance> balanceList) {
-        Properties properties = Utils.createConsumerProperties();
-        KafkaConsumer<String, Balance> consumer = new KafkaConsumer<String, Balance>(properties);
+        KafkaConsumer<String, Balance> consumer = new KafkaConsumer<String, Balance>(consumerProperties);
         String topic = "Balance";
 
         consumer.subscribe(Collections.singleton(topic));
 
-        System.out.println("Waiting for Balance data...");
+        logger.info("Waiting for Balance data...");
 
         ConsumerRecords<String, Balance> records = consumer.poll(500);
         if (records != null && !records.isEmpty()) {
@@ -38,7 +40,7 @@ public class BalanceAvroMessageConsumer {
             }
             for (ConsumerRecord<String, Balance> record : records) {
                 Balance balance = record.value();
-                System.out.println(balance);
+                logger.debug(balance.toString());
 
                 balanceList.add(balance);
             }

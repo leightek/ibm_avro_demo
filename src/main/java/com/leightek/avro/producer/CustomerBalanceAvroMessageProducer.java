@@ -1,11 +1,13 @@
 package com.leightek.avro.producer;
 
 import com.ibm.gbs.schema.CustomerBalance;
-import com.leightek.avro.util.Utils;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Properties;
@@ -13,16 +15,17 @@ import java.util.Properties;
 @Component
 public class CustomerBalanceAvroMessageProducer {
 
-    private Properties producerConfigs;
+    private static Logger logger = LoggerFactory.getLogger(BalanceAvroMessageProducer.class);
 
-    public CustomerBalanceAvroMessageProducer(Properties producerConfigs) {
-        this.producerConfigs = producerConfigs;
+    private Properties producerProperties;
+
+    public CustomerBalanceAvroMessageProducer(@Qualifier("kafkaProducerConfigs") Properties producerProperties) {
+        this.producerProperties = producerProperties;
     }
 
     public void produceMessage(CustomerBalance customerBalance) {
 
-        Properties properties = Utils.createProducerProperties();
-        KafkaProducer<String, CustomerBalance> kafkaProducer = new KafkaProducer<String, CustomerBalance>(properties);
+        KafkaProducer<String, CustomerBalance> kafkaProducer = new KafkaProducer<String, CustomerBalance>(producerProperties);
         String topic = "CustomerBalance";
 
         ProducerRecord<String, CustomerBalance> producerRecord = new ProducerRecord<String, CustomerBalance>(topic,
@@ -32,10 +35,10 @@ public class CustomerBalanceAvroMessageProducer {
             @Override
             public void onCompletion(RecordMetadata metadata, Exception exception) {
                 if (exception == null) {
-                    System.out.println("Produce Customer Balance message successfully!");
-                    System.out.println(metadata.toString());
+                    logger.info("Produce Customer Balance message successfully!");
+                    logger.debug(metadata.toString());
                 } else {
-                    exception.printStackTrace();
+                    logger.error("Exception encountered during producing Customer Balance message: ", exception);
                 }
             }
         });

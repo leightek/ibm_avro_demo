@@ -27,7 +27,7 @@ public class KafkaConsumerConfig {
     @Value(value = "specific.avro.reader")
     String isSpecificAvroReader;
 
-    @Bean
+    @Bean("kafkaConsumerConfigs")
     public Properties kafkaConsumerConfigs() {
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", (String) baseProperties.get("bootstrap.servers"));

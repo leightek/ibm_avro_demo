@@ -24,7 +24,7 @@ public class KafkaProducerConfig {
     @Value(value = "${schema.registry.url}")
     String schemaRegistryUrl;
 
-    @Bean
+    @Bean("kafkaProducerConfigs")
     public Properties kafkaProducerConfigs() {
         Properties properties = new Properties();
 

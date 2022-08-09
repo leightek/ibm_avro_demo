@@ -1,11 +1,13 @@
 package com.leightek.avro.producer;
 
 import com.ibm.gbs.schema.Balance;
-import com.leightek.avro.util.Utils;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Properties;
@@ -13,17 +15,17 @@ import java.util.Properties;
 @Component
 public class BalanceAvroMessageProducer {
 
-    private Properties producerConfigs;
+    private static Logger logger = LoggerFactory.getLogger(BalanceAvroMessageProducer.class);
 
-    public BalanceAvroMessageProducer(Properties producerConfigs) {
-        this.producerConfigs = producerConfigs;
+    private Properties producerProperties;
+
+    public BalanceAvroMessageProducer(@Qualifier("kafkaProducerConfigs") Properties producerProperties) {
+        this.producerProperties = producerProperties;
     }
 
     public void produceMessage() {
 
-        Properties properties = Utils.createProducerProperties();
-
-        KafkaProducer<String, Balance> kafkaProducer = new KafkaProducer<String, Balance>(properties);
+        KafkaProducer<String, Balance> kafkaProducer = new KafkaProducer<String, Balance>(producerProperties);
 
         Balance balance = Balance.newBuilder()
                 .setBalanceId("j")
@@ -38,10 +40,10 @@ public class BalanceAvroMessageProducer {
             @Override
             public void onCompletion(RecordMetadata metadata, Exception exception) {
                 if (exception == null) {
-                    System.out.println("Produce Balance message successfully!");
-                    System.out.println(metadata.toString());
+                    logger.info("Produce Balance message successfully!");
+                    logger.debug(metadata.toString());
                 } else {
-                    exception.printStackTrace();
+                    logger.error("Exception encountered during producing Balance message: ", exception);
                 }
             }
         });

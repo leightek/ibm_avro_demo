@@ -1,11 +1,12 @@
 package com.leightek.avro.consumer;
 
 import com.ibm.gbs.schema.Customer;
-import com.leightek.avro.util.Utils;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -15,26 +16,27 @@ import java.util.Properties;
 @Component
 public class CustomerAvroMessageConsumer {
 
-    private ConsumerConfig consumerConfigs;
+    private static Logger logger = LoggerFactory.getLogger(CustomerAvroMessageConsumer.class);
 
-    public CustomerAvroMessageConsumer(ConsumerConfig consumerConfigs) {
-        this.consumerConfigs = consumerConfigs;
+    private Properties consumerProperties;
+
+    public CustomerAvroMessageConsumer(@Qualifier("kafkaConsumerConfigs") Properties consumerProperties) {
+        this.consumerProperties = consumerProperties;
     }
 
     public List<Customer> consumeMessage(List<Customer> customers) {
-        Properties properties = Utils.createConsumerProperties();
-        KafkaConsumer<String, Customer> consumer = new KafkaConsumer<String, Customer>(properties);
+        KafkaConsumer<String, Customer> consumer = new KafkaConsumer<String, Customer>(consumerProperties);
         String topic = "Customer";
 
         consumer.subscribe(Collections.singleton(topic));
 
-        System.out.println("Waiting for Customer data...");
+        logger.info("Waiting for Customer data...");
 
         ConsumerRecords<String, Customer> records = consumer.poll(500);
         if (records != null && !records.isEmpty()) {
             for (ConsumerRecord<String, Customer> record : records) {
                 Customer customer = record.value();
-                System.out.println(customer);
+                logger.debug(customer.toString());
 
                 customers.add(customer);
             }

@@ -8,11 +8,15 @@ import com.leightek.avro.consumer.CustomerAvroMessageConsumer;
 import com.leightek.avro.producer.BalanceAvroMessageProducer;
 import com.leightek.avro.producer.CustomerAvroMessageProducer;
 import com.leightek.avro.producer.CustomerBalanceAvroMessageProducer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class AvroStreamDemo implements Runnable {
+
+    private static Logger logger = LoggerFactory.getLogger(AvroStreamDemo.class);
 
     private CustomerAvroMessageProducer customerProducer;
     private BalanceAvroMessageProducer balanceProducer;
@@ -35,6 +39,9 @@ public class AvroStreamDemo implements Runnable {
 
     private static void mergeCustomerBalance(Customer customer, List<Balance> balanceList,
                                              List<CustomerBalance> customerBalanceList, Set<String> accountIds) {
+
+        logger.info("merging messages ...");
+
         balanceList.forEach(balance -> {
             if (Objects.equals(customer.getAccountId(), balance.getAccountId())) {
                 CustomerBalance customerBalance = CustomerBalance.newBuilder()
@@ -52,6 +59,7 @@ public class AvroStreamDemo implements Runnable {
     @Override
     public void run() {
 
+        logger.info("producing messages ...");
         customerProducer.produceMessage();
         balanceProducer.produceMessage();
 
@@ -61,6 +69,7 @@ public class AvroStreamDemo implements Runnable {
         Set<String> accountIds = new HashSet<>();
 
         while (true) {
+            logger.info("coonsuming messages ...");
             customers = customerConsumer.consumeMessage(customers);
             balanceList = balanceConsumer.consumeMessage(balanceList);
 
