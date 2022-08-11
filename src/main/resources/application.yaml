@@ -1,5 +1,6 @@
 spring:
-  active: local
+  profiles:
+    active: local
 
 ---
 spring:
@@ -14,7 +15,7 @@ kafka:
   consumer:
     group.id: my-avro-consumer
     enable.auto.commit: false
-    auto.offset.reset: earliest
+    auto.offset.reset: latest
 
 avro:
   schema.registry.url: http://127.0.0.1:8081

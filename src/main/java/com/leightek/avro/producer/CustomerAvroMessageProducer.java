@@ -7,25 +7,22 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.Properties;
-
 @Component
-public class CustomerAvroMessageProducer {
+public class CustomerAvroMessageProducer implements AvroMessageProducer {
 
     private static Logger logger = LoggerFactory.getLogger(CustomerAvroMessageProducer.class);
 
-    private Properties producerProperties;
+    private KafkaProducer<String, Object> kafkaProducer;
 
-    public CustomerAvroMessageProducer(@Qualifier("kafkaProducerConfigs") Properties producerProperties) {
-        this.producerProperties = producerProperties;
+    public CustomerAvroMessageProducer(KafkaProducer<String, Object> kafkaProducer) {
+        this.kafkaProducer = kafkaProducer;
     }
 
+    @Override
     public void produceMessage() {
 
-        KafkaProducer<String, Customer> kafkaProducer = new KafkaProducer<String, Customer>(producerProperties);
         String topic = "Customer";
 
         Customer customer = Customer.newBuilder()
@@ -35,7 +32,13 @@ public class CustomerAvroMessageProducer {
                 .setAccountId("b")
                 .build();
 
-        ProducerRecord<String, Customer> producerRecord = new ProducerRecord<String, Customer>(topic, customer);
+        produceMessage(topic, customer);
+
+    }
+
+    @Override
+    public void produceMessage(String topic, Object message) {
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(topic, message);
 
         kafkaProducer.send(producerRecord, new Callback() {
             @Override

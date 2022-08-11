@@ -7,25 +7,21 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.Properties;
-
 @Component
-public class BalanceAvroMessageProducer {
+public class BalanceAvroMessageProducer implements AvroMessageProducer {
 
     private static Logger logger = LoggerFactory.getLogger(BalanceAvroMessageProducer.class);
 
-    private Properties producerProperties;
+    private KafkaProducer<String, Object> kafkaProducer;
 
-    public BalanceAvroMessageProducer(@Qualifier("kafkaProducerConfigs") Properties producerProperties) {
-        this.producerProperties = producerProperties;
+    public BalanceAvroMessageProducer(KafkaProducer<String, Object> kafkaProducer) {
+        this.kafkaProducer = kafkaProducer;
     }
 
+    @Override
     public void produceMessage() {
-
-        KafkaProducer<String, Balance> kafkaProducer = new KafkaProducer<String, Balance>(producerProperties);
 
         Balance balance = Balance.newBuilder()
                 .setBalanceId("j")
@@ -34,7 +30,13 @@ public class BalanceAvroMessageProducer {
                 .build();
 
         String topic = "Balance";
-        ProducerRecord<String, Balance> producerRecord = new ProducerRecord<String, Balance>(topic, balance);
+
+        produceMessage(topic, balance);
+    }
+
+    @Override
+    public void produceMessage(String topic, Object message) {
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(topic, message);
 
         kafkaProducer.send(producerRecord, new Callback() {
             @Override

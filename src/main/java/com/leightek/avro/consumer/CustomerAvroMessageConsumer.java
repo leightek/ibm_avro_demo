@@ -6,42 +6,43 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 @Component
-public class CustomerAvroMessageConsumer {
+public class CustomerAvroMessageConsumer implements AvroMessageConsumer {
 
     private static Logger logger = LoggerFactory.getLogger(CustomerAvroMessageConsumer.class);
 
-    private Properties consumerProperties;
+    private KafkaConsumer<String, Object> kafkaConsumer;
 
-    public CustomerAvroMessageConsumer(@Qualifier("kafkaConsumerConfigs") Properties consumerProperties) {
-        this.consumerProperties = consumerProperties;
+    public CustomerAvroMessageConsumer(KafkaConsumer<String, Object> kafkaConsumer) {
+        this.kafkaConsumer = kafkaConsumer;
     }
 
-    public List<Customer> consumeMessage(List<Customer> customers) {
-        KafkaConsumer<String, Customer> consumer = new KafkaConsumer<String, Customer>(consumerProperties);
-        String topic = "Customer";
+    @Override
+    public List<Object> consumeMessage() {
 
-        consumer.subscribe(Collections.singleton(topic));
+        String topic = "Customer";
+        List<Object> customers = new ArrayList<>();
+
+        kafkaConsumer.subscribe(Collections.singleton(topic));
 
         logger.info("Waiting for Customer data...");
 
-        ConsumerRecords<String, Customer> records = consumer.poll(500);
+        ConsumerRecords<String, Object> records = kafkaConsumer.poll(500);
         if (records != null && !records.isEmpty()) {
-            for (ConsumerRecord<String, Customer> record : records) {
-                Customer customer = record.value();
+            for (ConsumerRecord<String, Object> record : records) {
+                Customer customer = (Customer) record.value();
                 logger.debug(customer.toString());
 
                 customers.add(customer);
             }
         }
-        consumer.commitSync();
+        kafkaConsumer.commitSync();
 
         return customers;
     }

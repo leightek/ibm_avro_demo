@@ -1,35 +1,34 @@
 package com.leightek.avro.producer;
 
-import com.ibm.gbs.schema.CustomerBalance;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.Properties;
-
 @Component
-public class CustomerBalanceAvroMessageProducer {
+public class CustomerBalanceAvroMessageProducer implements AvroMessageProducer {
 
     private static Logger logger = LoggerFactory.getLogger(CustomerBalanceAvroMessageProducer.class);
 
-    private Properties producerProperties;
+    private KafkaProducer<String, Object> kafkaProducer;
 
-    public CustomerBalanceAvroMessageProducer(@Qualifier("kafkaProducerConfigs") Properties producerProperties) {
-        this.producerProperties = producerProperties;
+    public CustomerBalanceAvroMessageProducer(KafkaProducer<String, Object> kafkaProducer) {
+        this.kafkaProducer = kafkaProducer;
     }
 
-    public void produceMessage(CustomerBalance customerBalance) {
+    @Override
+    public void produceMessage() {
+        // TODO
+    }
 
-        KafkaProducer<String, CustomerBalance> kafkaProducer = new KafkaProducer<String, CustomerBalance>(producerProperties);
-        String topic = "CustomerBalance";
+    @Override
+    public void produceMessage(String topic, Object message) {
 
-        ProducerRecord<String, CustomerBalance> producerRecord = new ProducerRecord<String, CustomerBalance>(topic,
-                customerBalance);
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(topic,
+                message);
 
         kafkaProducer.send(producerRecord, new Callback() {
             @Override

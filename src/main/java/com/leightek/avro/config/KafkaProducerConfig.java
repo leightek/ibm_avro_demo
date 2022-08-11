@@ -1,6 +1,7 @@
 package com.leightek.avro.config;
 
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,8 +25,7 @@ public class KafkaProducerConfig {
     @Value(value = "${schema.registry.url}")
     String schemaRegistryUrl;
 
-    @Bean("kafkaProducerConfigs")
-    public Properties kafkaProducerConfigs() {
+    private Properties getKafkaProducerConfigs() {
         Properties properties = new Properties();
 
         properties.setProperty("bootstrap.servers", (String) baseProperties.get("bootstrap.servers"));
@@ -38,4 +38,10 @@ public class KafkaProducerConfig {
 
         return properties;
     }
+
+    @Bean
+    public KafkaProducer<String, Object> kafkaProducer() {
+        return new KafkaProducer<>(getKafkaProducerConfigs());
+    }
+
 }

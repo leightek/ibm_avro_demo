@@ -1,6 +1,9 @@
 package com.leightek.avro.config;
 
+import com.leightek.avro.consumer.BalanceAvroMessageConsumer;
+import com.leightek.avro.consumer.CustomerAvroMessageConsumer;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -27,8 +30,7 @@ public class KafkaConsumerConfig {
     @Value(value = "specific.avro.reader")
     String isSpecificAvroReader;
 
-    @Bean("kafkaConsumerConfigs")
-    public Properties kafkaConsumerConfigs() {
+    private Properties getKafkaConsumerConfigs() {
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", (String) baseProperties.get("bootstrap.servers"));
         properties.setProperty("schema.registry.url", (String) baseProperties.get("schema.registry.url"));
@@ -42,4 +44,21 @@ public class KafkaConsumerConfig {
 
         return properties;
     }
+
+    @Bean
+    public KafkaConsumer<String, Object> kafkaConsumer() {
+        return new KafkaConsumer<>(getKafkaConsumerConfigs());
+    }
+
+    @Bean
+    public CustomerAvroMessageConsumer customerAvroMessageConsumer() {
+        return new CustomerAvroMessageConsumer(kafkaConsumer());
+    }
+
+    @Bean
+    public BalanceAvroMessageConsumer balanceAvroMessageConsumer() {
+        return new BalanceAvroMessageConsumer(kafkaConsumer());
+    }
+
+
 }

@@ -6,46 +6,45 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 @Component
-public class BalanceAvroMessageConsumer {
+public class BalanceAvroMessageConsumer implements AvroMessageConsumer {
 
     private static Logger logger = LoggerFactory.getLogger(BalanceAvroMessageConsumer.class);
 
-    private Properties consumerProperties;
+    private KafkaConsumer<String, Object> kafkaConsumer;
 
-    public BalanceAvroMessageConsumer(@Qualifier("kafkaConsumerConfigs") Properties consumerProperties) {
-        this.consumerProperties = consumerProperties;
+    public BalanceAvroMessageConsumer(KafkaConsumer<String, Object> kafkaConsumer) {
+        this.kafkaConsumer = kafkaConsumer;
     }
 
-    public List<Balance> consumeMessage(List<Balance> balanceList) {
-        KafkaConsumer<String, Balance> consumer = new KafkaConsumer<String, Balance>(consumerProperties);
-        String topic = "Balance";
+    public List<Object> consumeMessage() {
 
-        consumer.subscribe(Collections.singleton(topic));
+        String topic = "Balance";
+        List<Object> balanceList = new ArrayList<>();
+
+        kafkaConsumer.subscribe(Collections.singleton(topic));
 
         logger.info("Waiting for Balance data...");
 
-        ConsumerRecords<String, Balance> records = consumer.poll(500);
+        ConsumerRecords<String, Object> records = kafkaConsumer.poll(500);
         if (records != null && !records.isEmpty()) {
             if (balanceList == null) {
                 balanceList = new ArrayList<>();
             }
-            for (ConsumerRecord<String, Balance> record : records) {
-                Balance balance = record.value();
+            for (ConsumerRecord<String, Object> record : records) {
+                Balance balance = (Balance) record.value();
                 logger.debug(balance.toString());
 
                 balanceList.add(balance);
             }
         }
-        consumer.commitSync();
+        kafkaConsumer.commitSync();
 
         return balanceList;
     }
